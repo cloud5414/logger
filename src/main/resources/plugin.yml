@@ -1,6 +1,6 @@
 name: Logger
 version: ${version}
-description: logging
+description: Logger Plugin for other Plugins. This plugin can custom logging level  output.
 author: teruteru128
 main: com.github.teruteru128.logger.Main
 api-version: 1.20
