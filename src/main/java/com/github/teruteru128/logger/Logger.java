@@ -1,70 +1,131 @@
 package com.github.teruteru128.logger;
 
-import org.apache.logging.log4j.Level;
-import org.bukkit.plugin.Plugin;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.logging.log4j.Level;
+import org.bukkit.plugin.Plugin;
 
-
+/**
+ * プラグイン用ロガークラス
+ * これを経由することで、プラグイン本体のconfig.ymlにレベルを書き込むと、レベルの操作が可能になる。
+ * */
 public class Logger {
-    private static final Map<Plugin, Logger> map = Collections.synchronizedMap(new HashMap<>());
-    private final java.util.logging.Logger _logger;
-    private final Level configuredLevel;
 
-    Logger(java.util.logging.Logger logger, String level) {
-        this(logger, Level.toLevel(level, Level.INFO));
-    }
+  /** プラグインごとのLoggerが入ってるMAP */
+  private static final Map<Plugin, Logger> map = Collections.synchronizedMap(new HashMap<>());
+  /** ログ出力本体 */
+  private final java.util.logging.Logger _logger;
+  /** ログレベル */
+  private final Level configuredLevel;
 
-    Logger(java.util.logging.Logger logger, Level level) {
-        this._logger = logger;
-        this.configuredLevel = level;
-    }
+  /**
+   * コンストラクタ（文字列のログレベルを変更して、Level型のコンストラクタに渡す）
+   * @param logger ロガー
+   * @param level ログレベル（文字列）
+   * */
+  Logger(java.util.logging.Logger logger, String level) {
+    this(logger, Level.toLevel(level, Level.INFO));
+  }
 
-    public static void register(Plugin plugin, String logLevel) {
-        map.put(plugin, new Logger(plugin.getLogger(), logLevel));
-    }
+  /**
+   * コンストラクタ
+   * @param logger ロガー
+   * @param level ログレベル
+   * */
+  Logger(java.util.logging.Logger logger, Level level) {
+    this._logger = logger;
+    this.configuredLevel = level;
+  }
 
-    public static Logger getInstance(Plugin plugin) {
-        return map.get(plugin);
-    }
+  /**
+   * ロガー書き込み
+   * */
+  public static void register(Plugin plugin, String logLevel) {
+    map.put(plugin, new Logger(plugin.getLogger(), logLevel));
+  }
 
-    public static void unregister(Plugin plugin) {
-        map.remove(plugin);
-    }
+  /**
+   * プラグインに紐づくロガーを取得する
+   * @param plugin プラグイン本体
+   * */
+  public static Logger getInstance(Plugin plugin) {
+    return map.get(plugin);
+  }
 
-    public void fatal(String msg) {
-        this.log(Level.FATAL, java.util.logging.Level.SEVERE, msg);
-    }
+  /**
+   * プラグインに紐づくロガーを削除する
+   * @param plugin プラグイン本体
+   * */
+  public static void unregister(Plugin plugin) {
+    map.remove(plugin);
+  }
 
-    public void error(String msg) {
-        this.log(Level.ERROR, java.util.logging.Level.SEVERE, msg);
-    }
+  /**
+   * fatalレベルのログを出力する
+   * @param msg 出力メッセージ
+   * */
+  public void fatal(String msg) {
+    this.log(Level.FATAL, java.util.logging.Level.SEVERE, msg);
+  }
 
-    public void warn(String msg) {
-        this.log(Level.WARN, java.util.logging.Level.WARNING, msg);
-    }
+  /**
+   * errorレベルのログを出力する
+   * @param msg 出力メッセージ
+   * */
+  public void error(String msg) {
+    this.log(Level.ERROR, java.util.logging.Level.SEVERE, msg);
+  }
 
-    public void info(String msg) {
-        this.log(Level.INFO, java.util.logging.Level.INFO, msg);
-    }
+  /**
+   * warnレベルのログを出力する
+   * @param msg 出力メッセージ
+   * */
+  public void warn(String msg) {
+    this.log(Level.WARN, java.util.logging.Level.WARNING, msg);
+  }
 
-    public void debug(String msg) {
-        this.log(Level.DEBUG, java.util.logging.Level.INFO, msg);
-    }
+  /**
+   * infoレベルのログを出力する
+   * @param msg 出力メッセージ
+   * */
+  public void info(String msg) {
+    this.log(Level.INFO, java.util.logging.Level.INFO, msg);
+  }
 
-    public void trace(String msg) {
-        this.log(Level.TRACE, java.util.logging.Level.INFO, msg);
-    }
+  /**
+   * debugレベルのログを出力する
+   * @param msg 出力メッセージ
+   * */
+  public void debug(String msg) {
+    this.log(Level.DEBUG, java.util.logging.Level.INFO, msg);
+  }
 
-    public void log(org.apache.logging.log4j.Level viewLevel, java.util.logging.Level logLevel, String msg) {
-        if (viewLevel.compareTo(this.configuredLevel) >= 0) {
-            this._logger.log(logLevel, msg);
-        }
-    }
+  /**
+   * traceレベルのログを出力する
+   * @param msg 出力メッセージ
+   * */
+  public void trace(String msg) {
+    this.log(Level.TRACE, java.util.logging.Level.INFO, msg);
+  }
 
-    public java.util.logging.Logger getLogger() {
-        return this._logger;
+  /**
+   * ログの出力を判断して、を出力する
+   * @param viewLevel 表示に使用するログLevel
+   * @param logLevel 実際に出力に使用するログLevel
+   * @param msg 出力メッセージ
+   * */
+  public void log(org.apache.logging.log4j.Level viewLevel, java.util.logging.Level logLevel,
+      String msg) {
+    if (viewLevel.compareTo(this.configuredLevel) <= 0) {
+      this._logger.log(logLevel, msg);
     }
+  }
+
+  /**
+   * 格納されているロガーを取得する
+   * */
+  public java.util.logging.Logger getLogger() {
+    return this._logger;
+  }
 }
